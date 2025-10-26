@@ -1,14 +1,14 @@
 package algorithms;
 
-import model.Edge;
-import model.Graph;
+import model.*;
 import java.util.*;
 
 public class PrimAlgorithm {
-    public static void run(Graph g) {
+    public static AlgorithmResult run(Graph g) {
         long start = System.nanoTime();
         Map<String, List<Edge>> adj = new HashMap<>();
         for (String node : g.nodes) adj.put(node, new ArrayList<>());
+
         for (Edge e : g.edges) {
             adj.get(e.from).add(e);
             adj.get(e.to).add(new Edge(){{
@@ -18,7 +18,7 @@ public class PrimAlgorithm {
 
         Set<String> visited = new HashSet<>();
         PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingInt(e -> e.weight));
-        List<Edge> mst = new ArrayList<>();
+        List<MstEdge> mst = new ArrayList<>();
         int cost = 0, operations = 0;
 
         String startNode = g.nodes.get(0);
@@ -30,16 +30,13 @@ public class PrimAlgorithm {
             operations++;
             if (visited.contains(edge.to)) continue;
             visited.add(edge.to);
-            mst.add(edge);
+            mst.add(new MstEdge(edge.from, edge.to, edge.weight));
             cost += edge.weight;
             pq.addAll(adj.get(edge.to));
         }
 
         long end = System.nanoTime();
-        System.out.println("Prim MST (Graph ID " + g.id + "):");
-        mst.forEach(e -> System.out.println(e.from + " - " + e.to + " : " + e.weight));
-        System.out.println("Total Cost: " + cost);
-        System.out.println("Operations: " + operations);
-        System.out.println("Execution time: " + (end - start)/1e6 + " ms\n");
+        double timeMs = (end - start) / 1e6;
+        return new AlgorithmResult(mst, cost, operations, timeMs);
     }
 }
